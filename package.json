@@ -1,6 +1,6 @@
 {
 	"name": "@berhalak/decorators",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Typescript decorators",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
