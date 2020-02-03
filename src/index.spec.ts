@@ -21,14 +21,9 @@ test('a', () => {
 
 	class Person extends Decorator(CanEat, CanSleep) {
 		constructor(eater: CanEat, sleeper: CanSleep) {
-			super();
-			Decorator.use(this, eater, sleeper);
+			super(eater, sleeper);
 		}
 	}
-
-	let can: Partial<CanEat> = new Person(null, null);
-
-
 
 	const bob = new Person(new CanEat(), new CanSleep("test"));
 	bob.sleep();
