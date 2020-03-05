@@ -1,42 +1,50 @@
-import { Decorator, Mixin } from "./index"
+import { mix, decorate } from "./index"
 
-test('a', () => {
-	class CanEat {
-		constructor(private eaterName: string = null) {
-
-		}
-		eat() {
-			console.log(this.eaterName + " eating");
-		}
-	}
-
-	class CanSleep {
-		constructor(private sleeperName: string = null) {
+test('decorator demo', () => {
+	class Base {
+		constructor(private num: number = null) {
 
 		}
-		sleep() {
-			console.log(this.sleeperName + " sleeping");
+		baseMethod() {
+			return this.num;
 		}
 	}
 
-	class Person extends Decorator(CanEat, CanSleep) {
-		constructor(eater: CanEat, sleeper: CanSleep) {
-			super(eater, sleeper);
+	@decorate()
+	class Derive extends Base {
+		constructor(private inner: Base) {
+			super(null);
+		}
+
+		deriveMethod() {
+			return this.baseMethod() + 2;
 		}
 	}
 
-	const bob = new Person(new CanEat(), new CanSleep("test"));
-	bob.sleep();
+	const bob = new Derive(new Base(10));
 
-	class Person2 extends Mixin(CanEat, CanSleep) {
+	expect(bob.baseMethod()).toBe(10);
+	expect(bob.deriveMethod()).toBe(12);
+})
 
+test('mix demo', () => {
+	class Rename {
+		rename(name: string) {
+			(this as any).name = name;
+			return this;
+		}
 	}
 
-	const john = new Person2();
-	john.sleep();
+	class Printable {
+		print() {
+			return (this as any).name;
+		}
+	}
 
+	class Model extends mix(Rename, Printable) {
+		name = "test";
+	}
 
-	let jake = Decorator.decorate({}, new CanEat("jake"), new CanSleep("jake"));
-	jake.sleep();
-	jake.eat();
+	expect(new Model().print()).toBe("test");
+	expect(new Model().rename("hello").print()).toBe("hello");
 })

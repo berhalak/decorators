@@ -43,9 +43,9 @@ Decorator.use = function (self: any, ...any: any[]) {
 	self.$targets = any;
 }
 
-function decorate<T, T1>(self: T, t1: T1): T & T1
-function decorate<T, T1, T2>(self: T, t1: T1, t2: T2): T & T1 & T2
-function decorate<T>(self: T, ...objs: any[]): any {
+function deco<T, T1>(self: T, t1: T1): T & T1
+function deco<T, T1, T2>(self: T, t1: T1, t2: T2): T & T1 & T2
+function deco<T>(self: T, ...objs: any[]): any {
 	// overcome single argument
 	const decor = (Decorator as any)(...objs.map(x => x.constructor as any));
 
@@ -65,7 +65,7 @@ function decorate<T>(self: T, ...objs: any[]): any {
 	return self as any;
 }
 
-Decorator.decorate = decorate;
+Decorator.decorate = deco;
 
 export {
 	Decorator
@@ -73,11 +73,11 @@ export {
 
 
 
-function Mixin<T>(t1: Constructor<T>): Constructor<T>;
-function Mixin<T1, T2>(t1: Constructor<T1>, t2: Constructor<T2>): Constructor<T1 & T2>;
-function Mixin<T1, T2, T3>(t1: Constructor<T1>, t2: Constructor<T2>, t3: Constructor<T3>): Constructor<T1 & T2 & T3>;
-function Mixin<T1, T2, T3, T4>(t1: Constructor<T1>, t2: Constructor<T2>, t3: Constructor<T3>, t4: Constructor<T4>): Constructor<T1 & T2 & T3 & T4>;
-function Mixin(...types: Constructor<any>[]): Constructor<any> {
+function mix<T>(t1: Constructor<T>): Constructor<T>;
+function mix<T1, T2>(t1: Constructor<T1>, t2: Constructor<T2>): Constructor<T1 & T2>;
+function mix<T1, T2, T3>(t1: Constructor<T1>, t2: Constructor<T2>, t3: Constructor<T3>): Constructor<T1 & T2 & T3>;
+function mix<T1, T2, T3, T4>(t1: Constructor<T1>, t2: Constructor<T2>, t3: Constructor<T3>, t4: Constructor<T4>): Constructor<T1 & T2 & T3 & T4>;
+function mix(...types: Constructor<any>[]): Constructor<any> {
 	class sample {
 		constructor() {
 
@@ -93,5 +93,23 @@ function Mixin(...types: Constructor<any>[]): Constructor<any> {
 }
 
 export {
-	Mixin
+	mix
+}
+
+
+export function decorate(type?: Constructor<any>) {
+	return function (target: any) {
+		if (type === undefined) {
+			type = Object.getPrototypeOf(target.prototype).constructor;
+		}
+		Object.getOwnPropertyNames(type.prototype).forEach(name => {
+			if (name == 'constructor') return;
+			const desc = Object.getOwnPropertyDescriptor(target.prototype, name);
+			if (desc === undefined) {
+				target.prototype[name] = function (...args: any[]) {
+					return this["inner"][name](...args);
+				}
+			}
+		});
+	}
 }
